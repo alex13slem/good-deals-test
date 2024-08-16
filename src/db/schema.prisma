@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int          @id @default(autoincrement())
+  username         String       @unique
+  email            String       @unique
+  password_hash    String
+  tasks            Task[]
+  sentRequests     Friendship[] @relation("UserFriendships") // Отправленные запросы дружбы
+  receivedRequests Friendship[] @relation("FriendUserFriendships") // Полученные запросы дружбы
+
+  @@index([password_hash])
+  @@map("users")
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  created_at  DateTime @default(now())
+  title       String
+  description String?
+  completed   Boolean
+  user_id     Int
+  user        User     @relation(fields: [user_id], references: [id])
+
+  @@unique([title, user_id])
+  @@index([user_id])
+  @@map("tasks")
+}
+
+enum FriendshipStatus {
+  PENDING // Ожидание ответа
+  ACCEPTED // Запрос принят
+  REJECTED // Запрос отклонен
+}
+
+model Friendship {
+  id         Int              @id @default(autoincrement())
+  user_id    Int
+  friend_id  Int
+  status     FriendshipStatus @default(PENDING)
+  created_at DateTime         @default(now())
+  updated_at DateTime         @updatedAt
+
+  user   User @relation("UserFriendships", fields: [user_id], references: [id])
+  friend User @relation("FriendUserFriendships", fields: [friend_id], references: [id])
+
+  @@unique([user_id, friend_id])
+  @@index([user_id])
+  @@index([friend_id])
+  @@map("friendships")
+}
