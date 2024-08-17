@@ -2,16 +2,15 @@ import { Injectable } from '@nestjs/common';
 
 import { FriendshipStatus, Prisma } from '@prisma/client';
 import { AuthService } from '../auth/auth.service';
-import { PrismaService } from '../prisma.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto, UpdateUserDto } from './dto';
 import { NewUser, UpdateUser } from './user.entity';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly prisma: PrismaService
   ) {}
   async create(dto: CreateUserDto) {
     const passwordHash = await this.authService.hashPassword(

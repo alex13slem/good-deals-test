@@ -6,7 +6,7 @@
 
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl"]
+  binaryTargets = ["native", "linux-musl", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -15,16 +15,28 @@ datasource db {
 }
 
 model User {
-  id               Int          @id @default(autoincrement())
-  username         String       @unique
-  email            String       @unique
+  id               Int           @id @default(autoincrement())
+  username         String        @unique
+  email            String        @unique
   password_hash    String
   tasks            Task[]
-  sentRequests     Friendship[] @relation("UserFriendships") // Отправленные запросы дружбы
-  receivedRequests Friendship[] @relation("FriendUserFriendships") // Полученные запросы дружбы
+  sentRequests     Friendship[]  @relation("UserFriendships")
+  receivedRequests Friendship[]  @relation("FriendUserFriendships")
+  RefreshToken     RefreshToken?
 
-  @@index([password_hash])
   @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    Int      @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id])
+
+  @@index([token])
+  @@map("refresh_tokens")
 }
 
 model Task {
