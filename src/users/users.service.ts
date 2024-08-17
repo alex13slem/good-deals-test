@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { FriendshipStatus, Prisma } from '@prisma/client';
 import { AuthService } from '../auth/auth.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto, UpdateUserDto } from './dto';
-import { NewUser, UpdateUser } from './user.entity';
+import { CreateUserDto, UpdateUserDto } from './users.dto';
+import { NewUser, UpdateUser } from './users.entity';
 
 @Injectable()
 export class UserService {

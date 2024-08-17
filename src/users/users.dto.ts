@@ -3,7 +3,7 @@ import {
   createUserSchema,
   getUsersSchema,
   updateUserSchema,
-} from '../schemas';
+} from './users.schema';
 
 export type CreateUserDto = z.infer<typeof createUserSchema>;
 export type GetUsersDto = z.infer<typeof getUsersSchema>;

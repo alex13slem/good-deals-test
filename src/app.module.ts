@@ -6,7 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import configuration from './infra/configuration';
 import { PrismaModule } from './prisma/prisma.module';
 import { TaskModule } from './task/task.module';
-import { UserModule } from './user/user.module';
+import { UserModule } from './users/users.module';
 
 @Module({
   imports: [

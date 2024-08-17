@@ -1,15 +1,20 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
-export const createUserSchema = z
-  .object({
-    username: z.string(),
-    email: z.string().email(),
-    password: z.string(),
-  })
-  .required();
+const userSchema = z.object({
+  username: z.string(),
+  email: z.string().email(),
+  password: z.string().min(8, 'Password too short'),
+});
 
-export const updateUserSchema = createUserSchema.partial();
+export const createUserSchema = userSchema.required();
+export const updateUserSchema = userSchema.partial().strict();
+export const selectUserSchema = userSchema
+  .omit({ password: true })
+  .extend({
+    id: z.number(),
+    password_hash: z.string().optional(),
+  });
 
 export const getUsersSchema = z
   .object({

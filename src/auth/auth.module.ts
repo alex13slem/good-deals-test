@@ -4,7 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { configurationType } from '../infra/configuration';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';

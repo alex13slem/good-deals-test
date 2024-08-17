@@ -8,8 +8,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserService } from '../user/user.service';
-import { SignInDto } from './dto/auth.dto';
+import { UserService } from '../users/users.service';
+import { SignInDto } from './auth.dto';
 
 @Injectable()
 export class AuthService {

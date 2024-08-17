@@ -3,21 +3,26 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
-  ParseIntPipe,
   Post,
   UsePipes,
 } from '@nestjs/common';
-import { UserService } from '../user/user.service';
+import { UserService } from '../users/users.service';
+import {
+  RefreshTokenDto,
+  SignInDto,
+  SignOutDto,
+  SignUpDto,
+} from './auth.dto';
 import { AuthService } from './auth.service';
-import { SignInDto, SignUpDto } from './dto/auth.dto';
 
 import { ZodValidationPipe } from '../pipes/zod';
 import { Public } from './auth.decorator';
 import {
   refreshTokenSchema,
   signInSchema,
+  signOutSchema,
   signUpSchema,
-} from './schemas';
+} from './auth.schema';
 
 @Controller('auth')
 export class AuthController {
@@ -42,16 +47,21 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @UsePipes(new ZodValidationPipe(refreshTokenSchema))
   @HttpCode(HttpStatus.OK)
-  async refresh(@Body('refreshToken') refreshToken: string) {
-    return this.authService.refreshAccessToken(refreshToken);
+  async refresh(
+    @Body(new ZodValidationPipe(refreshTokenSchema))
+    dto: RefreshTokenDto
+  ) {
+    return this.authService.refreshAccessToken(dto.refreshToken);
   }
 
   @Post('signout')
   @HttpCode(HttpStatus.OK)
-  async signOut(@Body('userId', ParseIntPipe) userId: number) {
-    await this.authService.signOut(userId);
+  async signOut(
+    @Body(new ZodValidationPipe(signOutSchema))
+    dto: SignOutDto
+  ) {
+    await this.authService.signOut(dto.userId);
     return { message: 'Signed out successfully' };
   }
 }
