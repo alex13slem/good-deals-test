@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto, UpdateTaskDto } from './tasks';
@@ -7,8 +11,8 @@ import { NewTask } from './tasks.entity';
 @Injectable()
 export class TaskService {
   constructor(private readonly prisma: PrismaService) {}
-  async create(dto: CreateTaskDto) {
-    const data = new NewTask(dto);
+  async create(userId: number, dto: CreateTaskDto) {
+    const data = new NewTask({ ...dto, userId });
     try {
       return await this.prisma.task.create({ data });
     } catch (error) {
@@ -16,69 +20,52 @@ export class TaskService {
     }
   }
 
-  async tasks(userId: number) {
+  async getUserTasks(viewerId: number, userId: number) {
     try {
+      await this.checkAccess(viewerId, userId);
+
       return await this.prisma.task.findMany({
-        where: {
-          OR: [
-            { user_id: userId },
-            {
-              user: {
-                received_requests: {
-                  some: {
-                    user_id: userId,
-                    status: 'ACCEPTED',
-                  },
-                },
-                sent_requests: {
-                  some: {
-                    user_id: userId,
-                    status: 'ACCEPTED',
-                  },
-                },
-              },
-            },
-          ],
-        },
+        where: { user_id: userId },
       });
     } catch (error) {
       this.prisma.handleDatabaseError(error);
     }
   }
 
-  // async tasks(userId: number) {
-  //   // Получаем задачи, принадлежащие пользователю или его друзьям
-  //   return this.prisma.task.findMany({
-  //     where: {
-  //       OR: [
-  //         { userId: userId },
-  //         {
-  //           user: {
-  //             friends: {
-  //               some: {
-  //                 status: 'ACCEPTED',
-  //                 friend_id: userId,
-  //               },
-  //             },
-  //           },
-  //         },
-  //       ],
-  //     },
-  //   });
-  // }
-
-  async findOneById(id: number) {
+  async findOneById(
+    viewerId: number,
+    userId: number,
+    taskId: number
+  ) {
     try {
-      return await this.prisma.task.findUnique({ where: { id } });
+      await this.checkAccess(viewerId, userId);
+
+      return await this.prisma.task.findUnique({
+        where: { id: taskId },
+      });
     } catch (error) {
       this.prisma.handleDatabaseError(error);
     }
   }
 
-  async update(id: number, dto: UpdateTaskDto) {
+  async update(userId: number, taskId: number, dto: UpdateTaskDto) {
     try {
+      const task = await this.prisma.task.findUnique({
+        where: { id: taskId },
+      });
+
+      if (!task) {
+        throw new NotFoundException('Task not found');
+      }
+
+      if (task.user_id !== userId) {
+        throw new UnauthorizedException(
+          'You can only update your own tasks'
+        );
+      }
+
       return await this.prisma.task.update({
-        where: { id },
+        where: { id: taskId },
         data: dto,
       });
     } catch (error) {
@@ -86,11 +73,55 @@ export class TaskService {
     }
   }
 
-  async remove(id: number) {
+  async remove(userId: number, taskId: number) {
     try {
-      return await this.prisma.task.delete({ where: { id } });
+      const task = await this.prisma.task.findUnique({
+        where: { id: taskId },
+      });
+
+      if (!task) {
+        throw new NotFoundException('Task not found');
+      }
+
+      if (task.user_id !== userId) {
+        throw new UnauthorizedException(
+          'You can only delete your own tasks'
+        );
+      }
+      return await this.prisma.task.delete({ where: { id: taskId } });
     } catch (error) {
       this.prisma.handleDatabaseError(error);
+    }
+  }
+
+  private async checkAccess(viewerId: number, userId: number) {
+    const isFriendOrOwner = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        OR: [
+          { id: viewerId },
+          {
+            received_requests: {
+              some: {
+                user_id: viewerId,
+                status: 'ACCEPTED',
+              },
+            },
+            sent_requests: {
+              some: {
+                user_id: viewerId,
+                status: 'ACCEPTED',
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    if (!isFriendOrOwner) {
+      throw new UnauthorizedException(
+        'You do not have access to these tasks'
+      );
     }
   }
 }

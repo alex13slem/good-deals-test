@@ -12,7 +12,7 @@ export class NewTask {
     description,
     completed,
     userId,
-  }: CreateTaskDto) {
+  }: CreateTaskDto & { userId: number }) {
     this.title = title;
     this.description = description;
     this.completed = completed;

@@ -14,7 +14,7 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
     command: npm run start:dev
     ports:
-      - 3000:3000
+      - 5000:5000
     depends_on:
       - postgres
 

@@ -10,7 +10,7 @@ const taskSchema = z.object({
 });
 
 export const createTaskSchema = taskSchema
-  .omit({ id: true, createdAt: true })
+  .omit({ id: true, createdAt: true, userId: true })
   .required();
 export const updateTaskSchema = taskSchema
   .omit({ id: true, createdAt: true, userId: true })
