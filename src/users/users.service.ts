@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
-import { FriendshipStatus, Prisma } from '@prisma/client';
+import { FriendshipStatus } from '@prisma/client';
 import { AuthService } from '../auth/auth.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto, UpdateUserDto } from './users.dto';
+import { CreateUserDto, UpdateUserDto } from './users';
 import { NewUser, UpdateUser } from './users.entity';
 
 @Injectable()
@@ -16,85 +16,101 @@ export class UserService {
     const passwordHash = await this.authService.hashPassword(
       dto.password
     );
-    const data = new NewUser(dto.username, dto.email, passwordHash);
-    return this.prisma.user.create({ data });
+    const data = new NewUser({ ...dto, passwordHash });
+    try {
+      return await this.prisma.user.create({ data });
+    } catch (error) {
+      this.prisma.handleDatabaseError(error);
+    }
   }
 
-  users(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-  }) {
-    const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.user.findMany({
-      skip,
-      take,
-      cursor,
-      where,
-      orderBy,
-      select: {
-        id: true,
-        username: true,
-        email: true,
-      },
-    });
+  async users() {
+    try {
+      return await this.prisma.user.findMany({
+        select: {
+          id: true,
+          username: true,
+          email: true,
+        },
+      });
+    } catch (error) {
+      this.prisma.handleDatabaseError(error);
+    }
   }
 
   async findFriends(id: number) {
-    return this.prisma.friendship
-      .findMany({
-        where: {
-          OR: [
-            { user_id: id, status: FriendshipStatus.ACCEPTED },
-            { friend_id: id, status: 'ACCEPTED' },
-          ],
-        },
-        select: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-              email: true,
+    try {
+      return await this.prisma.friendship
+        .findMany({
+          where: {
+            OR: [
+              { user_id: id, status: FriendshipStatus.ACCEPTED },
+              { friend_id: id, status: FriendshipStatus.ACCEPTED },
+            ],
+          },
+          select: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                email: true,
+              },
+            },
+            friend: {
+              select: {
+                id: true,
+                username: true,
+                email: true,
+              },
             },
           },
-          friend: {
-            select: {
-              id: true,
-              username: true,
-              email: true,
-            },
-          },
-        },
-      })
-      .then((friends) =>
-        friends.map((f) => (f.user.id === id ? f.friend : f.user))
-      );
+        })
+        .then((friends) =>
+          friends.map((f) => (f.user.id === id ? f.friend : f.user))
+        );
+    } catch (error) {
+      this.prisma.handleDatabaseError(error);
+    }
   }
 
   async findOneById(id: number) {
-    return this.prisma.user.findUnique({ where: { id } });
+    try {
+      return await this.prisma.user.findUnique({ where: { id } });
+    } catch (error) {
+      this.prisma.handleDatabaseError(error);
+    }
   }
 
   async findOneByEmail(email: string) {
-    return this.prisma.user.findUnique({ where: { email } });
+    try {
+      return await this.prisma.user.findUnique({ where: { email } });
+    } catch (error) {
+      this.prisma.handleDatabaseError(error);
+    }
   }
 
   async update(id: number, dto: UpdateUserDto) {
-    const data = new UpdateUser(dto.username, dto.email);
+    const data = new UpdateUser(dto);
     if (dto.password) {
       data.password_hash = await this.authService.hashPassword(
         dto.password
       );
     }
-    return this.prisma.user.update({
-      where: { id },
-      data,
-    });
+    try {
+      return await this.prisma.user.update({
+        where: { id },
+        data,
+      });
+    } catch (error) {
+      this.prisma.handleDatabaseError(error);
+    }
   }
 
   async remove(id: number) {
-    return this.prisma.user.delete({ where: { id } });
+    try {
+      return await this.prisma.user.delete({ where: { id } });
+    } catch (error) {
+      this.prisma.handleDatabaseError(error);
+    }
   }
 }

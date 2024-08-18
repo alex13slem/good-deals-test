@@ -5,8 +5,9 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import configuration from './infra/configuration';
 import { PrismaModule } from './prisma/prisma.module';
-import { TaskModule } from './task/task.module';
+import { TaskModule } from './tasks/tasks.module';
 import { UserModule } from './users/users.module';
+import { FriendsModule } from './friends/friends.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserModule } from './users/users.module';
     AuthModule,
     UserModule,
     TaskModule,
+    FriendsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

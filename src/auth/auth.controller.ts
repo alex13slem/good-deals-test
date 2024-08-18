@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
+  Request,
   UsePipes,
 } from '@nestjs/common';
 import { UserService } from '../users/users.service';
@@ -17,6 +19,7 @@ import { AuthService } from './auth.service';
 
 import { ZodValidationPipe } from '../pipes/zod';
 import { Public } from './auth.decorator';
+import { AuthenticatedRequest } from './auth.guard';
 import {
   refreshTokenSchema,
   signInSchema,
@@ -31,6 +34,14 @@ export class AuthController {
     private readonly userService: UserService
   ) {}
 
+  @Get('user')
+  @HttpCode(HttpStatus.OK)
+  async user(@Request() req: AuthenticatedRequest) {
+    const user = await this.userService.findOneById(req.user.sub);
+    return user;
+  }
+
+  @Public()
   @Post('signin')
   @UsePipes(new ZodValidationPipe(signInSchema))
   @HttpCode(HttpStatus.OK)

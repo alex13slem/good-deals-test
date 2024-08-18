@@ -19,7 +19,7 @@ import { AuthService } from './auth.service';
       ) => ({
         global: true,
         secret: config.get('jwtSecret'),
-        signOptions: { expiresIn: '60s' },
+        signOptions: { expiresIn: '24h' },
       }),
       inject: [ConfigService],
     }),

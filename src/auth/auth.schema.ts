@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { createUserSchema } from '../users/users.schema';
+import { createUserDtoSchema } from '../users/users.schema';
 
-export const signUpSchema = createUserSchema;
+export const signUpSchema = createUserDtoSchema;
 
 export const signInSchema = signUpSchema.omit({
   username: true,

@@ -1,15 +1,12 @@
 [
   {
-    "id": 2,
-    "username": "arnold",
-    "email": "asd@asd.sd",
-    "password_hash": "$2a$10$lLV8AB6Tn.UoLeSWHySjruRmxgdcRL3FdfV4lSarkQP6O.CJTfSoa"
+    "id": 4,
+    "username": "adolf",
+    "email": "hitler@ss.de",
+    "password_hash": "$2a$10$TL/7n5tNz2/3OJFGIsea7erk3I5GLy/Ty9vnJ5xwZ95WpeF/IVlt2"
   },
   {
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYXNkQGFzZC5zZCIsImlhdCI6MTcyMzkzMTU1MCwiZXhwIjoxNzIzOTMxNjEwfQ.GFqF9qCrA7e4vkVVHRefmYS2FsIFqXtQE-1rpS2TiGM",
-    "refreshToken": "esoLt9BZU6TjP4xmLih5djF/Rfci7kLsz1gX3+dsheU="
-  },
-  {
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYXNkQGFzZC5zZCIsImlhdCI6MTcyMzkzMTkwNywiZXhwIjoxNzIzOTMxOTY3fQ.d0HFlmEisFcPeNU0qyhdgiWLK9zS3P7LYK0xQRiOfkw"
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQsImVtYWlsIjoiaGl0bGVyQHNzLmRlIiwiaWF0IjoxNzI0MDA1NTQ3LCJleHAiOjE3MjQwOTE5NDd9.GbzO3-wE9Z9EeIkJLi8jx6OgObQ528rvaBk2cJ2xMmY",
+    "refreshToken": "+UcFooFrn7ZTfUVswXh09LhAg+/Zy0/cyg/xbrMFhXM="
   }
 ]

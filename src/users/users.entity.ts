@@ -1,14 +1,15 @@
 import { Prisma } from '@prisma/client';
+import { CreateUser } from './users';
 
 export class NewUser implements Prisma.UserCreateInput {
   public username: string;
   public email: string;
   public password_hash: string;
 
-  constructor(username: string, email: string, passwordHash: string) {
-    this.username = username;
-    this.email = email;
-    this.password_hash = passwordHash;
+  constructor(user: CreateUser) {
+    this.username = user.username;
+    this.email = user.email;
+    this.password_hash = user.passwordHash;
   }
 }
 
@@ -17,13 +18,9 @@ export class UpdateUser implements Prisma.UserUpdateInput {
   public email?: string;
   public password_hash?: string;
 
-  constructor(
-    username?: string,
-    email?: string,
-    passwordHash?: string
-  ) {
-    this.username = username;
-    this.email = email;
-    this.password_hash = passwordHash;
+  constructor(user: Partial<CreateUser>) {
+    this.username = user.username;
+    this.email = user.email;
+    this.password_hash = user.passwordHash;
   }
 }

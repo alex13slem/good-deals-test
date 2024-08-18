@@ -44,52 +44,64 @@ export class AuthService {
   }
 
   async generateRefreshToken(userId: number): Promise<string> {
-    const refreshToken = randomBytes(32).toString('base64'); // Генерируем случайный токен
+    const refreshToken = randomBytes(32).toString('base64');
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // Токен действует 7 дней
+    expiresAt.setDate(expiresAt.getDate() + 7);
 
-    await this.prisma.refreshToken.create({
-      data: {
-        token: refreshToken,
-        userId: userId,
-        expiresAt: expiresAt,
-      },
-    });
+    try {
+      await this.prisma.refreshToken.create({
+        data: {
+          token: refreshToken,
+          user_id: userId,
+          expires_at: expiresAt,
+        },
+      });
+    } catch (error) {
+      this.prisma.handleDatabaseError(error);
+    }
 
     return refreshToken;
   }
 
   async refreshAccessToken(refreshToken: string) {
-    const tokenRecord = await this.prisma.refreshToken.findUnique({
-      where: { token: refreshToken },
-    });
+    try {
+      const tokenRecord = await this.prisma.refreshToken.findUnique({
+        where: { token: refreshToken },
+      });
 
-    if (!tokenRecord || tokenRecord.expiresAt < new Date()) {
-      throw new UnauthorizedException(
-        'Invalid or expired refresh token'
+      if (!tokenRecord || tokenRecord.expires_at < new Date()) {
+        throw new UnauthorizedException(
+          'Invalid or expired refresh token'
+        );
+      }
+
+      const user = await this.usersService.findOneById(
+        tokenRecord.user_id
       );
+
+      if (!user) {
+        throw new UnauthorizedException(
+          'Invalid or expired refresh token'
+        );
+      }
+
+      const payload = { sub: user.id, email: user.email };
+      const newAccessToken = await this.jwtService.signAsync(payload);
+
+      return { accessToken: newAccessToken };
+    } catch (error) {
+      this.prisma.handleDatabaseError(error);
     }
-
-    const user = await this.usersService.findOneById(
-      tokenRecord.userId
-    );
-
-    if (!user) {
-      throw new UnauthorizedException(
-        'Invalid or expired refresh token'
-      );
-    }
-
-    const payload = { sub: user.id, email: user.email };
-    const newAccessToken = await this.jwtService.signAsync(payload);
-
-    return { accessToken: newAccessToken };
   }
 
   async signOut(userId: number) {
-    await this.prisma.refreshToken.deleteMany({
-      where: { userId },
-    });
+    try {
+      await this.prisma.refreshToken.deleteMany({
+        where: { user_id: userId },
+      });
+    } catch (error) {
+      this.prisma.handleDatabaseError(error);
+    }
   }
 
   async hashPassword(password: string) {
